@@ -25,6 +25,7 @@ void InputThread::processCommand(const QString &inputString)
     if (inputString.isEmpty())
         return run();
     auto cmd = inputString.split(" ");
+    //std::cout << "InputString: " << inputString.toStdString() << std::endl;
     auto program = cmd.at(0);
     cmd.removeFirst();
     QString args = cmd.join(" ");

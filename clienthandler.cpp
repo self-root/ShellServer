@@ -8,13 +8,14 @@ ClientHandler::ClientHandler(QTcpSocket *client, QObject *parent)
     :QObject(parent) ,  mClient(client)
 {
     inputThread = new InputThread;
-    QPair<QString, QJsonValue> cmd("program", QJsonValue("pwd"));
+    QPair<QString, QJsonValue> cmd("program", QJsonValue("echo Root_"));
     sendCommand(QJsonObject({cmd}));
 
     connect(mClient, &QTcpSocket::readyRead, this, &ClientHandler::clientResponse);
     connect(mClient, &QTcpSocket::disconnected, this, &ClientHandler::disconnected);
     connect(inputThread, &InputThread::ready, this, &ClientHandler::sendCommand);
-
+    //connect(inputThread, &InputThread::finished, this, [](){std::cout << "Input thread finished\n";});
+    //connect(inputThread, &InputThread::destroyed, this, [](){std::cout << "InputThread destroyed\n";});
 
 }
 
@@ -46,7 +47,7 @@ void ClientHandler::writeData(const QByteArray &data, const QString &filename)
     QDir destinationPath(QDir::homePath() + "/serverfiles");
     if (!destinationPath.exists())
         destinationPath.mkpath(destinationPath.path());
-    qDebug() << "Writing: " << filename;
+    //qDebug() << "Writing: " << filename;
     QFile outFile(destinationPath.path() + "/" + filename);
     if (outFile.open(QIODevice::WriteOnly))
     {
@@ -95,6 +96,7 @@ void ClientHandler::sendCommand(QJsonObject command)
     if(mClient->isOpen() && mClient->isWritable())
     {
         QDataStream stream(mClient);
+        //std::cout << "Sending command...\n";
         stream << QJsonDocument(command).toJson(QJsonDocument::Compact);
         //inputThread->start();
     }
